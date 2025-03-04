@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برنامج تمارين 30 يوم</title>
+    <style>
+        :root {
+            --primary-color: #6888BE;
+            --secondary-color: #9FB6E0;
+            --accent-color: #FFA07A;
+            --background: #F5F5F6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--background);
+            line-height: 1.6;
+            color: #333;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        .program-title {
+            text-align: center;
+            color: var(--primary-color);
+            margin: 2rem 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .main-page { display: block; }
+        .detail-page { display: none; }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .day-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .day-card.completed {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .day-card.current {
+            box-shadow: 0 0 0 2px var(--accent-color);
+        }
+
+        .detail-page.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .day-header {
+            background: linear-gradient(135deg, var(--primary-color), #5078B3);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin: 3rem 0 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .complete-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #completeBtn {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        #cancelBtn {
+            background: #e53935;
+            color: white;
+            display: none;
+        }
+
+        .progress-container {
+            position: relative;
+            height: 25px;
+            background: #E0E0E0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 2rem 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transition: width 0.4s ease;
+        }
+
+        .exercise-list {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+        }
+
+        .exercise-item {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
+            margin: 1rem 0;
+            background: #F8F9FA;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .exercise-item:hover {
+            transform: translateX(10px);
+        }
+
+        .exercise-item img {
+            width: 100%;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid var(--secondary-color);
+        }
+
+        .timer-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        #restTimer {
+            font-size: 2.5rem;
+            font-family: monospace;
+            margin: 1rem 0;
+            color: var(--primary-color);
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .timer-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .rest-card {
+            background: #E3F2FD;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .motivation-section {
+            margin-top: 3rem;
+            padding: 2rem 0;
+        }
+
+        .motivation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .motivation-img {
+            width: 100%;
+            height: 200px;
+            border-radius: 15px;
+            object-fit: cover;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .motivation-img:hover {
+            transform: scale(1.03);
+        }
+
+        .exercise-detail-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 2rem 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .exercise-detail-page.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .exercise-detail-content {
+            background: white;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 15px;
+            position: relative;
+            transform: translateY(-50px);
+            transition: all 0.3s ease;
+        }
+
+        .exercise-detail-page.active .exercise-detail-content {
+            transform: translateY(0);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.1em;
+        }
+
+        .exercise-detail-img {
+            width: 100%;
+            height: 600px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .exercise-description {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #444;
+            white-space: pre-wrap;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 1rem;
+            direction: rtl;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .scroll-top-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            font-size: 1.2em;
+            z-index: 1000;
+        }
+
+        .exercise-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
+        }
+
+        .nav-button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            background: var(--primary-color);
+            color: white;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .complete-day-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            background: #4CAF50;
+            color: white;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        .complete-day-btn:hover {
+            transform: scale(1.05);
+            background: #45a049;
+        }
+
+        .exercise-timer-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 2rem auto;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        #exerciseTimer {
+            font-size: 2.5rem;
+            font-family: monospace;
+            margin: 1rem 0;
+            color: var(--primary-color);
+        }
+
+        .exercise-timer-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .program-title {
+                font-size: 2em;
+                margin: 1.5rem 0;
+            }
+            .days-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            }
+            .exercise-item {
+                grid-template-columns: 80px 1fr;
+            }
+            .back-btn {
+                top: 10px;
+                left: 10px;
+                padding: 8px 15px;
+            }
+            .motivation-grid {
+                grid-template-columns: 1fr;
+            }
+            .motivation-img {
+                height: 150px;
+            }
+            .exercise-detail-content {
+                margin: 1rem;
+                padding: 1rem;
+            }
+            .exercise-detail-img {
+                height: 250px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .exercise-detail-img {
+                height: 200px;
+            }
+            .exercise-description {
+                font-size: 0.9em;
+                padding: 0.8rem;
+            }
+            .close-btn {
+                top: 10px;
+                left: 10px;
+                padding: 6px 12px;
+            }
+            .scroll-top-btn {
+                bottom: 20px;
+                left: 20px;
+                width: 35px;
+                height: 35px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container main-page">
+        <h1 class="program-title">برنامج التمارين الشهري</h1>
+        <div class="days-grid" id="daysContainer"></div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress"></div>
+        </div>
+        
+        <div class="motivation-section">
+            <h3 style="text-align: center; color: var(--primary-color); margin-bottom: 1rem;">
+                ✨ صور تحفيزية
+            </h3>
+            <div class="motivation-grid">
+                <img src="images/timer.jpg" class="motivation-img" alt="تحفيز رياضي" loading="lazy">
+                <img src="images/motivation2.jpg" class="motivation-img" alt="لياقة بدنية" loading="lazy">
+                <img src="images/motivation3.jpg" class="motivation-img" alt="تحدي اللياقة" loading="lazy">
+                <img src="images/motivation4.jpg" class="motivation-img" alt="نجاح رياضي" loading="lazy">
+            </div>
+        </div>
+    </div>
+
+    <div class="container detail-page">
+        <button class="back-btn" onclick="showMainPage()">← رجوع</button>
+        <div class="day-header">
+            <h2>اليوم <span id="dayNumber">1</span></h2>
+            <div class="button-group">
+                <button class="complete-btn" id="completeBtn" onclick="toggleComplete()">تم إنجاز اليوم</button>
+                <button class="complete-btn" id="cancelBtn" onclick="undoComplete()">إلغاء الإنجاز</button>
+            </div>
+        </div>
+        
+        <div id="workoutContent"></div>
+        
+        <div class="timer-card">
+            <h3>⏱️ مؤقت الراحة</h3>
+            <div id="restTimer">01:30</div>
+            <div class="timer-controls">
+                <button class="timer-btn" onclick="startTimer()">بدء</button>
+                <button class="timer-btn" onclick="resetTimer()" style="background: #e53935;">إعادة ضبط</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="exercise-detail-page" id="exerciseDetail">
+        <div class="exercise-detail-content">
+            <button class="close-btn" onclick="closeExerciseDetail()">✕ إغلاق</button>
+            <img id="detailExerciseImg" class="exercise-detail-img" alt="تفاصيل التمرين">
+            <h2 id="detailExerciseTitle" style="color: var(--primary-color); text-align: center; margin: 1rem 0;"></h2>
+            <pre class="exercise-description" id="detailExerciseDesc"></pre>
+            
+            <div class="exercise-navigation">
+                <button class="nav-button" onclick="navigateExercise('prev')" id="prevBtn">← السابق</button>
+                <div id="navigationControls">
+                    <button class="nav-button" onclick="navigateExercise('next')" id="nextBtn">التالي →</button>
+                </div>
+            </div>
+
+            <div class="exercise-timer-card">
+                <h3>⏱️ مؤقت الراحة</h3>
+                <div id="exerciseTimer">01:30</div>
+                <div class="exercise-timer-controls">
+                    <button class="timer-btn" onclick="startExerciseTimer()">بدء</button>
+                    <button class="timer-btn" onclick="resetExerciseTimer()" style="background: #e53935;">إعادة ضبط</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="scroll-top-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</button>
+
+    <script>
+        let currentDay = 1;
+        const totalDays = 30;
+        let timer;
+        let timeLeft = 90;
+        let completedDays = JSON.parse(localStorage.getItem('completedDays')) || [];
+        let exerciseTimer;
+        let exerciseTimeLeft = 90;
+        let currentWorkout = [];
+        let currentExerciseIndex = 0;
+
+        const dailyWorkouts = {
+            1: {
+                warmup: [
+                    {name: 'ضغط عالي 15 تكرار', image: 'incline-push-up-bench.gif', desc: 'تقوية الصدر'},
+                    {name: 'نط الحبل 3 دقائق', image: 'stretching.jpg', desc: 'إحماء لتنشيط الدورة الدموية'},
+                    {name: 'حركات مرونة', image: 'push-ups.gif', desc: 'لا اكثر مرونه تهيئة العضلات'}
+                ],
+                main: [
+                    {name: 'ضغط عالي 15 تكرار', image: 'incline-push-up-bench.gif', desc: 'تقوية الصدر'},
+                    {name: 'ضغط عقلة 15 تكرار', image: 'negative_chin_up.gif', desc: 'تقوية الصدر'},
+                    {name: 'ضغط عالي 15 تكرار', image: 'incline-push-up-bench.gif', desc: 'تقوية الصدر'},
+                    {name: 'قرفصاء 20 تكرار', image: "day1-main2.jpg", desc: 'تقوية الأرجل'}
+                ],
+                core: [
+                    {name: 'ضغ كور 15 تكرار', image: 'CHAIR-DIPS.gif', desc: 'تقوية الصدر'},
+                    {name: 'ضغط عالي 15 تكرار', image: 'incline-push-up-bench.gif', desc: 'تقوية الصدر'},
+                    {name: 'ضغط عالي 15 تكرار', image: 'incline-push-up-bench.gif', desc: 'تقوية الصدر'},
+                    {name: 'بلانك جانبي 45 ثانية', image: 'day1-core.jpg', desc: 'تقوية الجانبين'}
+                ]
+            },
+            2: {
+                warmup: [
+                    {name: 'الجري في المكان', image: 'day2-warmup1.jpg', desc: 'زيادة النبض'},
+                    {name: 'الجري في المكان', image: 'day2-warmup1.jpg', desc: 'زيادة النبض'},
+                    {name: 'دوران الكتفين', image: 'day2-warmup2.jpg', desc: 'تهيئة المفاصل'}
+                ],
+                main: [
+                    {name: 'سحب بالبار 12 تكرار', image: 'day2-main1.jpg', desc: 'تقوية الظهر'},
+                    {name: 'سحب بالبار 12 تكرار', image: 'day2-main1.jpg', desc: 'تقوية الظهر'},
+                    {name: 'سحب بالبار 12 تكرار', image: 'day2-main1.jpg', desc: 'تقوية الظهر'},
+                    {name: 'اندفاع 15 تكرار', image: 'day2-main2.jpg', desc: 'تحسين التوازن'}
+                ],
+                core: [
+                    {name: 'سحب بالبار 12 تكرار', image: 'day2-main1.jpg', desc: 'تقوية الظهر'},
+                    {name: 'رفع الساقين', image: 'day2-core.jpg', desc: 'تقوية البطن'}
+                ]
+            },
+            4: {
+                warmup: [
+                    {name: 'ضغط عالي 15 تكرار', image: 'incline-push-up-bench.gif', desc: 'تقوية الصدر'},
+                    {name: 'نط الحبل 3 دقائق', image: 'stretching.jpg', desc: 'إحماء لتنشيط الدورة الدموية'},
+                    {name: 'حركات مرونة', image: 'push-ups.gif', desc: 'لا اكثر مرونه تهيئة العضلات'}
+                ],
+                main: [
+                    {name: 'ضغط عالي 15 تكرار', image: 'incline-push-up-bench.gif', desc: 'تقوية الصدر'},
+                    {name: 'ضغط عالي 15 تكرار', image: 'negative_chin_up.gif', desc: 'تقوية الصدر'},
+                    {name: 'ضغط عالي 15 تكرار', image: 'incline-push-up-bench.gif', desc: 'تقوية الصدر'},
+                    {name: 'قرفصاء 20 تكرار', image: "day1-main2.jpg", desc: 'تقوية الأرجل'}
+                ],
+                core: [
+                    {name: 'ضغ كور 15 تكرار', image: 'CHAIR-DIPS.gif', desc: 'تمرين لتقوية العضلة ثلاثية الرؤوس ( العضلة الكبيرة في الجزء الخلفي من الجزء العلوي من الذراع )'},
+                    {name: 'ضغط عالي 15 تكرار', image: 'incline-push-up-bench.gif', desc: 'تقوية الصدر'},
+                    {name: 'ضغط عالي 15 تكرار', image: 'incline-push-up-bench.gif', desc: 'تقوية الصدر'},
+                    {name: 'بلانك جانبي 45 ثانية', image: 'day1-core.jpg', desc: 'تقوية الجانبين'}
+                ]
+            },
+            // أضف بقية الأيام بنفس النمط حتى 30
+        };
+
+        function initDaysGrid() {
+            const container = document.getElementById('daysContainer');
+            container.innerHTML = '';
+            for (let day = 1; day <= totalDays; day++) {
+                const dayCard = document.createElement('div');
+                dayCard.className = `day-card 
+                    ${completedDays.includes(day) ? 'completed' : ''} 
+                    ${day === currentDay ? 'current' : ''}`;
+                dayCard.textContent = day;
+                dayCard.onclick = () => selectDay(day);
+                container.appendChild(dayCard);
+            }
+        }
+
+        function selectDay(day) {
+            currentDay = day;
+            document.querySelector('.main-page').style.display = 'none';
+            document.querySelector('.detail-page').classList.add('active');
+            resetTimer();
+            updateUI();
+        }
+
+        function showMainPage() {
+            document.querySelector('.main-page').style.display = 'block';
+            document.querySelector('.detail-page').classList.remove('active');
+            initDaysGrid();
+        }
+
+        function toggleComplete() {
+            if (isRestDay(currentDay)) {
+                alert('❗ لا يمكن إكمال يوم الراحة!');
+                return;
+            }
+            
+            if (!completedDays.includes(currentDay)) {
+                completedDays.push(currentDay);
+                localStorage.setItem('completedDays', JSON.stringify(completedDays));
+                updateUI();
+                initDaysGrid();
+            }
+        }
+
+        function undoComplete() {
+            const index = completedDays.indexOf(currentDay);
+            if (index > -1) {
+                completedDays.splice(index, 1);
+                localStorage.setItem('completedDays', JSON.stringify(completedDays));
+                updateUI();
+                initDaysGrid();
+            }
+        }
+
+        function isRestDay(day) {
+            return day % 7 === 0;
+        }
+
+        function generateWorkout(day) {
+            if (isRestDay(day)) return null;
+            return dailyWorkouts[day];
+        }
+
+        function escapeExerciseData(exercise) {
+            return JSON.stringify(exercise)
+                .replace(/</g, '\\u003c')
+                .replace(/'/g, "\\'")
+                .replace(/"/g, '&quot;');
+        }
+
+        function openExerciseDetail(exercise, index, workoutType) {
+            const workout = dailyWorkouts[currentDay];
+            currentWorkout = [
+                ...workout.warmup,
+                ...workout.main,
+                ...workout.core
+            ];
+            currentExerciseIndex = currentWorkout.findIndex(ex => ex.name === exercise.name);
+            
+            const detailPage = document.getElementById('exerciseDetail');
+            detailPage.classList.add('active');
+            
+            updateExerciseDetail();
+            updateNavigationButtons();
+            resetExerciseTimer();
+            
+            document.body.style.overflow = 'hidden';
+
+            detailPage.addEventListener('click', (e) => {
+                if (e.target === detailPage) {
+                    closeExerciseDetail();
+                }
+            });
+        }
+
+        function closeExerciseDetail() {
+            document.getElementById('exerciseDetail').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            resetExerciseTimer();
+        }
+
+        function updateExerciseDetail() {
+            const exercise = currentWorkout[currentExerciseIndex];
+            const formattedDesc = exercise.desc.replace(/\n/g, '<br>');
+            
+            document.getElementById('detailExerciseImg').src = `images/${exercise.image}`;
+            document.getElementById('detailExerciseTitle').textContent = exercise.name;
+            document.getElementById('detailExerciseDesc').innerHTML = formattedDesc;
+        }
+
+        function updateNavigationButtons() {
+            const workout = dailyWorkouts[currentDay];
+            if (!workout) return;
+
+            const totalExercises = [
+                ...workout.warmup,
+                ...workout.main,
+                ...workout.core
+            ];
+
+            const isLastExercise = currentExerciseIndex === totalExercises.length - 1;
+
+            document.getElementById('prevBtn').disabled = currentExerciseIndex === 0;
+
+            const navControls = document.getElementById('navigationControls');
+            navControls.innerHTML = isLastExercise ? 
+                `<button class="complete-day-btn" onclick="completeDay()">✔️ تم إنجاز اليوم</button>` :
+                `<button class="nav-button" onclick="navigateExercise('next')" id="nextBtn">التالي →</button>`;
+        }
+
+        function completeDay() {
+            if (!completedDays.includes(currentDay) && !isRestDay(currentDay)) {
+                completedDays.push(currentDay);
+                localStorage.setItem('completedDays', JSON.stringify(completedDays));
+                updateUI();
+                initDaysGrid();
+                alert('🎉 تم حفظ إنجاز اليوم بنجاح!');
+            }
+            closeExerciseDetail();
+            showMainPage();
+        }
+
+        function navigateExercise(direction) {
+            document.querySelector('.exercise-detail-content').style.opacity = '0';
+            
+            setTimeout(() => {
+                if(direction === 'next' && currentExerciseIndex < currentWorkout.length - 1) {
+                    currentExerciseIndex++;
+                } else if(direction === 'prev' && currentExerciseIndex > 0) {
+                    currentExerciseIndex--;
+                }
+                
+                updateExerciseDetail();
+                updateNavigationButtons();
+                resetExerciseTimer();
+                
+                document.querySelector('.exercise-detail-content').style.opacity = '1';
+            }, 300);
+        }
+
+        function startExerciseTimer() {
+            clearInterval(exerciseTimer);
+            exerciseTimer = setInterval(() => {
+                exerciseTimeLeft--;
+                document.getElementById('exerciseTimer').textContent = 
+                    `${Math.floor(exerciseTimeLeft / 60).toString().padStart(2, '0')}:${(exerciseTimeLeft % 60).toString().padStart(2, '0')}`;
+                
+                if (exerciseTimeLeft <= 0) {
+                    clearInterval(exerciseTimer);
+                    if (currentExerciseIndex < currentWorkout.length - 1) {
+                        navigateExercise('next');
+                    } else {
+                        completeDay();
+                    }
+                }
+            }, 1000);
+        }
+
+        function resetExerciseTimer() {
+            clearInterval(exerciseTimer);
+            exerciseTimeLeft = 90;
+            document.getElementById('exerciseTimer').textContent = '01:30';
+        }
+
+        function updateUI() {
+            const isCompleted = completedDays.includes(currentDay);
+            document.getElementById('completeBtn').style.display = isCompleted ? 'none' : 'block';
+            document.getElementById('cancelBtn').style.display = isCompleted ? 'block' : 'none';
+
+            document.getElementById('dayNumber').textContent = currentDay;
+            const progressPercent = (completedDays.length / totalDays) * 100;
+            document.getElementById('progress').style.width = `${progressPercent}%`;
+
+            const workout = generateWorkout(currentDay);
+            const workoutContent = document.getElementById('workoutContent');
+            
+            if (!workout) {
+                workoutContent.innerHTML = `
+                    <div class="rest-card">
+                        <h3>يوم راحة 🧘♂️</h3>
+                        <p>استغل هذا اليوم للاسترخاء والاستعداد للأيام القادمة</p>
+                    </div>`;
+                return;
+            }
+
+            workoutContent.innerHTML = `
+                <div class="exercise-list">
+                    <h3>تمارين الإحماء</h3>
+                    ${workout.warmup.map((ex, index) => `
+                        <div class="exercise-item" 
+                             onclick="openExerciseDetail(${escapeExerciseData(ex)}, ${index}, 'warmup')">
+                            <img src="images/${ex.image}" alt="${ex.name}">
+                            <div>
+                                <h4>${ex.name}</h4>
+                                <p>${ex.desc}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="exercise-list">
+                    <h3>التمارين الأساسية</h3>
+                    ${workout.main.map((ex, index) => `
+                        <div class="exercise-item" 
+                             onclick="openExerciseDetail(${escapeExerciseData(ex)}, ${index}, 'main')">
+                            <img src="images/${ex.image}" alt="${ex.name}">
+                            <div>
+                                <h4>${ex.name}</h4>
+                                <p>${ex.desc}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="exercise-list">
+                    <h3>تمارين الكور</h3>
+                    ${workout.core.map((ex, index) => `
+                        <div class="exercise-item" 
+                             onclick="openExerciseDetail(${escapeExerciseData(ex)}, ${index}, 'core')">
+                            <img src="images/${ex.image}" alt="${ex.name}">
+                            <div>
+                                <h4>${ex.name}</h4>
+                                <p>${ex.desc}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>`;
+        }
+
+        function startTimer() {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('restTimer').textContent = 
+                    `${Math.floor(timeLeft / 60).toString().padStart(2, '0')}:${(timeLeft % 60).toString().padStart(2, '0')}`;
+                if (timeLeft <= 0) clearInterval(timer);
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            timeLeft = 90;
+            document.getElementById('restTimer').textContent = '01:30';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeExerciseDetail();
+            }
+        });
+
+        initDaysGrid();
+    </script>
+</body>
+</html>
